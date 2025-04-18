@@ -1,11 +1,11 @@
 package database
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	_ "modernc.org/sqlite"
 )
@@ -44,21 +44,33 @@ func (d *SQLiteDriver) Connect(conf DBConfig) error {
 	d.db = db
 	d.conf = conf
 	return nil
-
 }
 
-// Close closes the database connection
-func (d *SQLiteDriver) Close() error {
-	return d.db.Close()
+// InitializeSchema creates tables and initializes the database
+func (d *SQLiteDriver) InitializeSchema() error {
+	// Read the schema file
+	path  := filepath.Join("database", "database_schema.sql")
+	path, err := os.ReadFile(path)
+	if err != nil {
+		return	fmt.Errorf("failed to read sche,a file: %w", err)
+	}
+
+	// Execute the schema
+	if _, err := d.db.Exec(string(schema)); err != nil {
+		// Ignore "already exists" errors
+		if !strings.Contains(err.Error(), "already exists") {
+			return fmt.Errorf("failed to excute schema: %w", err)
+		} 
+	}
+	return nil
 }
 
-// Ping checks the database connection
-func (d *SQLiteDriver) Ping() error {
-	return d.db.Ping()
+// GetDialet returns the SQL dialect name
+func (d *SQLiteDriver) GetDialet() string {
+	return "sqlite"
 }
 
-// BeginTx starts the a transaction
-func (d *SQLiteDriver) BeginTx(ctx context.Context) (*sql.Tx, error) {
-	return d.db.BeginTx(ctx, nil)
+// TransformQuery converts a generic SQL query to SQLite syntax
+func (s *SQLiteDriver) TransformQuery(query string) string {
+	return quer
 }
-
