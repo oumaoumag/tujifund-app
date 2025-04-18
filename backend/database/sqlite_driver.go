@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"os"
@@ -47,3 +48,17 @@ func (d *SQLiteDriver) Connect(conf DBConfig) error {
 }
 
 // Close closes the database connection
+func (d *SQLiteDriver) Close() error {
+	return d.db.Close()
+}
+
+// Ping checks the database connection
+func (d *SQLiteDriver) Ping() error {
+	return d.db.Ping()
+}
+
+// BeginTx starts the a transaction
+func (d *SQLiteDriver) BeginTx(ctx context.Context) (*sql.Tx, error) {
+	return d.db.BeginTx(ctx, nil)
+}
+
